@@ -21,7 +21,7 @@ console.log("DEBUG: lunghezza secret:", TUYA_CLIENT_SECRET && TUYA_CLIENT_SECRET
 
 const tuya = new TuyaContext({
   accessKey: TUYA_CLIENT_ID,
-  accessSecret: TUYA_CLIENT_SECRET,
+  secretKey: TUYA_CLIENT_SECRET,
   baseUrl: TUYA_BASE_URL
 });
 
@@ -106,6 +106,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Tuya backend (SDK) in ascolto sulla porta " + PORT);
 });
+
 
 
 
