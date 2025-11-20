@@ -28,22 +28,22 @@ const tuya = new TuyaContext({
 // ============ FUNZIONE: CREA PASSWORD TEMPORANEA ============
 
 async function createTempPassword(startTimeMs, endTimeMs) {
+  // Tu invii millisecondi, Tuya vuole secondi (10 cifre)
   const effectiveSec = Math.floor(startTimeMs / 1000);
   const invalidSec = Math.floor(endTimeMs / 1000);
 
-  console.log("Creo password temporanea Tuya per device:", TUYA_DEVICE_ID);
-  console.log("effective_time:", effectiveSec, "invalid_time:", invalidSec);
+  console.log("Creo password OFFLINE v1.0 per device:", TUYA_DEVICE_ID);
+  console.log("effective_time (sec):", effectiveSec, "invalid_time (sec):", invalidSec);
 
   const res = await tuya.request({
     method: "POST",
-    path: `/v1.1/devices/${TUYA_DEVICE_ID}/door-lock/offline-temp-password`,
+    path: `/v1.0/devices/${TUYA_DEVICE_ID}/door-lock/offline-temp-password`,
     body: {
-      offline_pwd_add_request: {
-        effective_time: effectiveSec,
-        invalid_time: invalidSec,
-        name: "SelfCheckinCode",
-        type: "multiple"
-      }
+      effective_time: effectiveSec,
+      invalid_time: invalidSec,
+      name: "SelfCheckinCode",
+      type: 0,   // 0 = riutilizzabile fino alla scadenza
+      lang: "en" // fuori dalla Cina → en
     }
   });
 
@@ -58,12 +58,14 @@ async function createTempPassword(startTimeMs, endTimeMs) {
     throw new Error("Risultato Tuya senza offline_temp_password: " + JSON.stringify(res));
   }
 
+  // v1.0 ritorna solo la password, non sempre i tempi → usiamo quelli che abbiamo passato noi
   return {
     code: r.offline_temp_password,
-    effectiveTimeMs: r.effective_time * 1000,
-    invalidTimeMs: r.invalid_time * 1000
+    effectiveTimeMs: startTimeMs,
+    invalidTimeMs: endTimeMs
   };
 }
+
 
 // ============ SERVER EXPRESS ============
 
@@ -106,6 +108,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Tuya backend (SDK) in ascolto sulla porta " + PORT);
 });
+
 
 
 
