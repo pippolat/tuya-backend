@@ -39,14 +39,31 @@ async function getTuyaToken() {
     "sign_method": "HMAC-SHA256"
   };
 
-  const resp = await axios.get(`${TUYA_BASE_URL}/v1.0/token?grant_type=1`, { headers });
+  const url = `${TUYA_BASE_URL}/v1.0/token?grant_type=1`;
+  console.log("Richiesta token Tuya a:", url);
+
+  const resp = await axios.get(url, { headers });
+
+  console.log("Risposta Tuya token:", JSON.stringify(resp.data));
+
+  if (!resp.data || resp.data.success !== true) {
+    throw new Error("Errore ottenendo token Tuya: " + JSON.stringify(resp.data));
+  }
+
   const result = resp.data.result;
+  if (!result || !result.access_token) {
+    throw new Error("Risposta token senza access_token: " + JSON.stringify(resp.data));
+  }
 
-  cachedToken = result.access_token;
-  cachedTokenExpireAt = now + result.expire_time * 1000;
+  const token = result.access_token;
+  const expire = result.expire_time;
 
-  return cachedToken;
+  cachedToken = token;
+  cachedTokenExpireAt = now + expire * 1000;
+
+  return token;
 }
+
 
 // ================== FIRMA RICHIESTE BUSINESS ==================
 
@@ -163,4 +180,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Doorlock backend in ascolto sulla porta " + PORT);
 });
+
 
