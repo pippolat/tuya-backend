@@ -11,8 +11,8 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@tuya/tuya-connector-nodejs": "^1.6.0",
-    "axios": "^1.13.2",
-    "express": "^4.18.2"
+  "@tuya/tuya-connector-nodejs": "2.1.2",
+  "axios": "^1.13.2",
+  "express": "^4.18.2"
   }
 }
