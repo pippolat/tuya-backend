@@ -127,6 +127,11 @@ async function createTempPassword(startTimeMs, endTimeMs) {
 const app = express();
 app.use(express.json());
 
+// Endpoint di test per verificare che il server risponda
+app.get("/", (req, res) => {
+  res.send("Tuya backend attivo");
+});
+
 // Endpoint chiamato da Google Apps Script
 app.post("/generateLockCode", async (req, res) => {
   try {
@@ -158,3 +163,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Doorlock backend in ascolto sulla porta " + PORT);
 });
+
