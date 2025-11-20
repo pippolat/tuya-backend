@@ -25,6 +25,24 @@ const tuya = new TuyaContext({
   baseUrl: TUYA_BASE_URL
 });
 
+// Elimina tutte le temporary password (offline + temp) per un device
+async function resetTempPasswords(deviceId) {
+  console.log("Reset temporary passwords per device:", deviceId);
+
+  const res = await tuya.request({
+    method: "POST",
+    path: `/v1.0/devices/${deviceId}/door-lock/temp-passwords/rest-password`
+  });
+
+  console.log("Risposta Tuya resetTempPasswords:", JSON.stringify(res));
+
+  if (!res || res.success !== true) {
+    throw new Error("Errore Tuya resetTempPasswords: " + JSON.stringify(res));
+  }
+
+  return true;
+}
+
 // ============ FUNZIONE: CREA PASSWORD TEMPORANEA ============
 
 async function createTempPassword(deviceId, startTimeMs, endTimeMs) {
@@ -107,6 +125,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Tuya backend (SDK) in ascolto sulla porta " + PORT);
 });
+
 
 
 
