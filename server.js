@@ -5,8 +5,8 @@ const crypto = require("crypto");
 // ================== CONFIGURAZIONE TUYA ==================
 
 // Sostituisci con i tuoi dati del progetto Tuya
-const TUYA_CLIENT_ID = "h3vhgjfr44qg4ug53yya";
-const TUYA_CLIENT_SECRET = "50b2f6ab94634344a3d4a0fe9a967b74";
+const TUYA_CLIENT_ID = "ep7vfqefm35t8ec779ku";
+const TUYA_CLIENT_SECRET = "75dbfb3358484d00b0ad7cbcaf638711";
 
 // Device ID della serratura Tuya (copialo da Tuya Cloud → Devices)
 const TUYA_DEVICE_ID = "bf78239666e007293e3a3q";
@@ -202,5 +202,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Doorlock backend in ascolto sulla porta " + PORT);
 });
+
 
 
