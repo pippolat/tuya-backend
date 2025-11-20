@@ -105,7 +105,27 @@ app.post("/generateLockCode", async (req, res) => {
       });
     }
 
-    const pwd = await createTempPassword(deviceId, startTimeMs, endTimeMs);
+    let pwd;
+    try {
+      // Primo tentativo: crea la password normalmente
+      pwd = await createTempPassword(deviceId, startTimeMs, endTimeMs);
+    } catch (err) {
+      const msg = err.toString();
+      console.error("Errore createTempPassword:", msg);
+
+      // Se l'errore è "offline passwords exceeds the limit", facciamo reset e riproviamo
+      if (msg.includes("\"code\":2326") || msg.includes("exceeds the limit")) {
+        console.log("Limite offline password raggiunto. Eseguo reset temp-passwords e ritento...");
+
+        await resetTempPasswords(deviceId);
+
+        // Secondo tentativo dopo reset
+        pwd = await createTempPassword(deviceId, startTimeMs, endTimeMs);
+      } else {
+        // Se è un altro tipo di errore, lo rilanciamo
+        throw err;
+      }
+    }
 
     return res.json({
       success: true,
@@ -121,10 +141,12 @@ app.post("/generateLockCode", async (req, res) => {
 });
 
 
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Tuya backend (SDK) in ascolto sulla porta " + PORT);
 });
+
 
 
 
