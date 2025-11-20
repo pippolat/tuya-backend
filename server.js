@@ -78,16 +78,16 @@ app.get("/", (req, res) => {
 // Endpoint chiamato da Google Apps Script
 app.post("/generateLockCode", async (req, res) => {
   try {
-    const { startTimeMs, endTimeMs } = req.body || {};
+    const { deviceId, startTimeMs, endTimeMs } = req.body || {};
 
-    if (!startTimeMs || !endTimeMs) {
+    if (!deviceId || !startTimeMs || !endTimeMs) {
       return res.status(400).json({
         success: false,
-        error: "startTimeMs ed endTimeMs sono obbligatori"
+        error: "deviceId, startTimeMs ed endTimeMs sono obbligatori"
       });
     }
 
-    const pwd = await createTempPassword(startTimeMs, endTimeMs);
+    const pwd = await createTempPassword(deviceId, startTimeMs, endTimeMs);
 
     return res.json({
       success: true,
@@ -102,10 +102,12 @@ app.post("/generateLockCode", async (req, res) => {
   }
 });
 
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Tuya backend (SDK) in ascolto sulla porta " + PORT);
 });
+
 
 
 
