@@ -104,3 +104,4 @@ app.listen(PORT, () => {
   console.log("Tuya backend (SDK) in ascolto sulla porta " + PORT);
 });
 
+
