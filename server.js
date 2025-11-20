@@ -98,5 +98,99 @@ function signRequest(accessToken, method, path, bodyJson) {
 
 // ================== CREA PASSWORD TEMPORANEA ==================
 
-async function createTemp
+async function createTempPassword(startTimeMs, endTimeMs) {
+  const token = await getTuyaToken();
+
+  const effectiveSec = Math.floor(startTimeMs / 1000);
+  const invalidSec = Math.floor(endTimeMs / 1000);
+
+  const path = `/v1.1/devices/${TUYA_DEVICE_ID}/door-lock/offline-temp-password`;
+  const method = "POST";
+
+  const body = {
+    offline_pwd_add_request: {
+      effective_time: effectiveSec,
+      invalid_time: invalidSec,
+      name: "SelfCheckinCode",
+      type: "multiple" // password offline riutilizzabile nella finestra
+    }
+  };
+
+  const bodyJson = JSON.stringify(body);
+  const { sign, t } = signRequest(token, method, path, bodyJson);
+
+  const headers = {
+    "client_id": TUYA_CLIENT_ID,
+    "access_token": token,
+    "sign": sign,
+    "t": t,
+    "sign_method": "HMAC-SHA256",
+    "Content-Type": "application/json"
+  };
+
+  const url = `${TUYA_BASE_URL}${path}`;
+  console.log("Richiesta creazione password temporanea a:", url);
+  console.log("Body richiesta:", bodyJson);
+
+  const resp = await axios.post(url, body, { headers });
+
+  console.log("Risposta Tuya offline-temp-password:", JSON.stringify(resp.data));
+
+  if (!resp.data || resp.data.success !== true) {
+    throw new Error("Errore Tuya offline-temp-password: " + JSON.stringify(resp.data));
+  }
+
+  const result = resp.data.result;
+  if (!result || !result.offline_temp_password) {
+    throw new Error("Risultato Tuya senza offline_temp_password: " + JSON.stringify(resp.data));
+  }
+
+  return {
+    code: result.offline_temp_password,
+    effectiveTimeMs: result.effective_time * 1000,
+    invalidTimeMs: result.invalid_time * 1000
+  };
+}
+
+// ================== SERVER EXPRESS ==================
+
+const app = express();
+app.use(express.json());
+
+// Endpoint di test base
+app.get("/", (req, res) => {
+  res.send("Tuya backend attivo");
+});
+
+// Endpoint chiamato da Google Apps Script
+app.post("/generateLockCode", async (req, res) => {
+  try {
+    const { startTimeMs, endTimeMs } = req.body;
+
+    if (!startTimeMs || !endTimeMs) {
+      return res.status(400).json({
+        success: false,
+        error: "startTimeMs ed endTimeMs sono obbligatori"
+      });
+    }
+
+    const pwd = await createTempPassword(startTimeMs, endTimeMs);
+
+    return res.json({
+      success: true,
+      code: pwd.code,
+      effective_time_ms: pwd.effectiveTimeMs,
+      invalid_time_ms: pwd.invalidTimeMs
+    });
+
+  } catch (e) {
+    console.error("Errore /generateLockCode:", e.toString());
+    return res.status(500).json({ success: false, error: e.toString() });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log("Doorlock backend in ascolto sulla porta " + PORT);
+});
 
