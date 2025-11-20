@@ -19,7 +19,6 @@ const TUYA_BASE_URL = "https://openapi.tuyaeu.com";
 let cachedToken = null;
 let cachedTokenExpireAt = 0;
 
-// Ottiene il token di accesso da Tuya
 async function getTuyaToken() {
   const now = Date.now();
   if (cachedToken && now < cachedTokenExpireAt - 60000) {
@@ -28,12 +27,20 @@ async function getTuyaToken() {
   }
 
   const t = Date.now().toString();
-  const signStr = TUYA_CLIENT_ID + t;
+  const stringToSign = TUYA_CLIENT_ID + t;
+
+  console.log("DEBUG TUYA TOKEN");
+  console.log("client_id:", TUYA_CLIENT_ID);
+  console.log("t:", t);
+  console.log("stringToSign (client_id + t):", stringToSign);
+
   const sign = crypto
     .createHmac("sha256", TUYA_CLIENT_SECRET)
-    .update(signStr)
+    .update(stringToSign)
     .digest("hex")
     .toUpperCase();
+
+  console.log("sign calcolato:", sign);
 
   const headers = {
     "client_id": TUYA_CLIENT_ID,
@@ -44,10 +51,11 @@ async function getTuyaToken() {
 
   const url = `${TUYA_BASE_URL}/v1.0/token?grant_type=1`;
   console.log("Richiesta token Tuya a:", url);
+  console.log("Headers usati:", JSON.stringify(headers));
 
   const resp = await axios.get(url, { headers });
 
-  console.log("Risposta Tuya token:", JSON.stringify(resp.data));
+  console.log("Risposta Tuya token RAW:", JSON.stringify(resp.data));
 
   if (!resp.data || resp.data.success !== true) {
     throw new Error("Errore ottenendo token Tuya: " + JSON.stringify(resp.data));
@@ -68,6 +76,7 @@ async function getTuyaToken() {
 
   return token;
 }
+
 
 // ================== FIRMA RICHIESTE BUSINESS ==================
 
@@ -193,4 +202,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Doorlock backend in ascolto sulla porta " + PORT);
 });
+
 
