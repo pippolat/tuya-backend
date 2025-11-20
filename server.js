@@ -14,6 +14,9 @@ const TUYA_DEVICE_ID = "bf78239666e007293e3a3q";
 // Data center EU
 const TUYA_BASE_URL = "https://openapi.tuyaeu.com";
 
+console.log("DEBUG: lunghezza secret:", TUYA_CLIENT_SECRET && TUYA_CLIENT_SECRET.length);
+
+
 // ============ CREAZIONE CONTESTO TUYA ============
 
 const tuya = new TuyaContext({
@@ -103,5 +106,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Tuya backend (SDK) in ascolto sulla porta " + PORT);
 });
+
 
 
